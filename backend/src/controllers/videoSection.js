@@ -14,7 +14,7 @@ cloudinary.config({
 const generateUploadSignature = async (req, res) => {
   try {
     const { problemId } = req.params;
-    
+
     const userId = req.result._id;
     // Verify problem exists
     const problem = await Problem.findById(problemId);
@@ -25,7 +25,7 @@ const generateUploadSignature = async (req, res) => {
     // Generate unique public_id for the video
     const timestamp = Math.round(new Date().getTime() / 1000);
     const publicId = `leetcode-solutions/${problemId}/${userId}_${timestamp}`;
-    
+
     // Upload parameters
     const uploadParams = {
       timestamp: timestamp,
@@ -89,16 +89,24 @@ const saveVideoMetadata = async (req, res) => {
     // const thumbnailUrl = cloudinary.url(cloudinaryResource.public_id, {
     // resource_type: 'image',  
     // transformation: [
-    // { width: 400, height: 225, crop: 'fill' },
+    // { width: 400, height: 225, crop: 'fill' }, 
     // { quality: 'auto' },
     // { start_offset: 'auto' }  
     // ],
     // format: 'jpg'
     // });
 
-    const thumbnailUrl = cloudinary.image(cloudinaryResource.public_id,{resource_type: "video"})
+    const thumbnailUrl = cloudinary.url(cloudinaryResource.public_id, {
+      resource_type: 'video',
+      format: 'jpg',              // grabs a frame and converts it to a jpg thumbnail
+      transformation: [
+        { width: 400, height: 225, crop: 'fill' },
+        { quality: 'auto' },
+        { start_offset: 'auto' }  // picks a representative frame, not just frame 0
+      ]
+    });
 
-// https://cloudinary.com/documentation/video_effects_and_enhancements#video_thumbnails
+    // https://cloudinary.com/documentation/video_effects_and_enhancements#video_thumbnails
     // Create video solution record
     const videoSolution = await SolutionVideo.create({
       problemId,
@@ -132,15 +140,15 @@ const deleteVideo = async (req, res) => {
     const { problemId } = req.params;
     const userId = req.result._id;
 
-    const video = await SolutionVideo.findOneAndDelete({problemId:problemId});
-    
-   
+    const video = await SolutionVideo.findOneAndDelete({ problemId: problemId });
+
+
 
     if (!video) {
       return res.status(404).json({ error: 'Video not found' });
     }
 
-    await cloudinary.uploader.destroy(video.cloudinaryPublicId, { resource_type: 'video' , invalidate: true });
+    await cloudinary.uploader.destroy(video.cloudinaryPublicId, { resource_type: 'video', invalidate: true });
 
     res.json({ message: 'Video deleted successfully' });
 
@@ -150,4 +158,4 @@ const deleteVideo = async (req, res) => {
   }
 };
 
-module.exports = {generateUploadSignature,saveVideoMetadata,deleteVideo};
+module.exports = { generateUploadSignature, saveVideoMetadata, deleteVideo };

@@ -1,4 +1,4 @@
- const redisClient = require("../config/redis");
+const redisClient = require("../config/redis");
 const User =  require("../models/user")
 const validate = require('../utils/validator');
 const bcrypt = require("bcrypt");
@@ -9,7 +9,7 @@ const Submission = require("../models/submission")
 const register = async (req,res)=>{
     
     try{
-        // validate the data;
+        // validate the data using validator;
 
       validate(req.body); 
       const {firstName, emailId, password}  = req.body;
@@ -88,7 +88,7 @@ const logout = async(req,res)=>{
 
     try{
         const {token} = req.cookies;
-        const payload = jwt.decode(token);jwt.decode(token) //takes that encoded string and converts it back into a readable JS object
+        const payload = jwt.decode(token); //takes that encoded string and converts it back into a readable JS object
  
 
         await redisClient.set(`token:${token}`,'Blocked');
@@ -135,10 +135,6 @@ const deleteProfile = async(req,res)=>{
       
     // userSchema delete
     await User.findByIdAndDelete(userId);
-
-    // Submission se bhi delete karo...
-    
-    // await Submission.deleteMany({userId});
     
     res.status(200).send("Deleted Successfully");
 

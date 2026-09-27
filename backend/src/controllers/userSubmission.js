@@ -8,8 +8,8 @@ const submitCode = async (req,res)=>{
     // 
     try{
       
-       const userId = req.result._id;
-       const problemId = req.params.id;
+       const userId = req.result._id;//logged in user will send this
+       const problemId = req.params.id;//comes from the route
 
        let {code,language} = req.body;
 
@@ -25,8 +25,6 @@ const submitCode = async (req,res)=>{
     //    Fetch the problem from database
        const problem =  await Problem.findById(problemId);
     //    testcases(Hidden)
-    
-    //   Kya apne submission store kar du pehle
     const submittedResult = await Submission.create({
           userId,
           problemId,
@@ -90,7 +88,7 @@ const submitCode = async (req,res)=>{
 
     await submittedResult.save();
     
-    // ProblemId ko insert karenge userSchema ke problemSolved mein if it is not persent there.
+    // ProblemId ko insert krr userSchema ke problemSolved mein if it is not persent there.
     
     // req.result == user Information
 
@@ -116,8 +114,7 @@ const submitCode = async (req,res)=>{
 
 
 const runCode = async(req,res)=>{
-    
-     // 
+         // 
      try{
       const userId = req.result._id;
       const problemId = req.params.id;
